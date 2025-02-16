@@ -595,37 +595,51 @@ document.addEventListener('keydown', (e) => {
             }
         });
 
-        async function uploadFile() {
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Vui lòng chọn ảnh trước khi tải lên');
-                return;
-            }
+       async function uploadFile() {
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Vui lòng chọn ảnh trước khi tải lên');
+        return;
+    }
 
-            const formData = new FormData();
-            formData.append('file', file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-            try {
-                uploadButton.disabled = true;
-                uploadButton.textContent = 'Đang tải lên...';
+    try {
+        uploadButton.disabled = true;
+        uploadButton.textContent = 'Đang tải lên...';
 
-                const response = await fetch('http://localhost:3000/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+        const response = await fetch('https://tobicoo-dev-azure.up.railway.app/upload', {
+            method: 'POST',
+            body: formData
+        });
 
-                const result = await response.json();
-                document.getElementById('direct-link').value = result.url;
-                document.getElementById('link-container').style.display = 'block';
-                
-            } catch (error) {
-                console.error('Lỗi:', error);
-                alert('Tải lên thất bại!');
-            } finally {
-                uploadButton.disabled = false;
-                uploadButton.textContent = 'Chọn hình ảnh';
-            }
+        if (!response.ok) {
+            throw new Error('Lỗi tải lên: ' + response.statusText);
         }
+
+        const result = await response.json();
+        console.log("Phản hồi từ server:", result);
+
+        if (result.url) {
+            document.getElementById('direct-link').value = result.url;
+            document.getElementById('link-container').style.display = 'block';
+
+            // Chuyển hướng đến trang xem ảnh
+            window.location.href = `view-image.html?url=${encodeURIComponent(result.url)}`;
+        } else {
+            alert("Lỗi: Không nhận được URL ảnh từ server!");
+        }
+        
+    } catch (error) {
+        console.error('Lỗi:', error);
+        alert('Tải lên thất bại!');
+    } finally {
+        uploadButton.disabled = false;
+        uploadButton.textContent = 'Chọn hình ảnh';
+    }
+}
+
 
         // ========== KÉO THẢ ==========
         dropZone.addEventListener('dragover', (e) => {
