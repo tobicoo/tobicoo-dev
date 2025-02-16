@@ -646,10 +646,7 @@ fileInput.addEventListener('change', function(e) {
             alert("Lỗi: Không nhận được URL ảnh từ server!");
         }
         
-    } catch (error) {
-        console.error('Lỗi:', error);
-        alert('Tải lên thất bại!'); // Hiển thị thông báo lỗi
-    } finally {
+    }  finally {
         uploadButton.disabled = false;
         uploadButton.textContent = 'Chọn hình ảnh';
     }
