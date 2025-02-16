@@ -616,42 +616,35 @@ async function uploadFile() {
 
         // Kiểm tra mã trạng thái HTTP
         if (!response.ok) {
-            const errorMessage = await response.text(); // Lấy thông báo lỗi từ server
+            const errorMessage = await response.text();
             throw new Error('Lỗi tải lên: ' + errorMessage);
         }
 
         const result = await response.json();
 
-        // Kiểm tra xem có URL trong kết quả không
+        // Kiểm tra xem có trường url trong kết quả không
         if (result && result.url) {
             document.getElementById('direct-link').value = result.url;
             document.getElementById('link-container').style.display = 'block';
 
             // Hiện nút sao chép liên kết
             const copyButton = document.getElementById('copy-button');
-            copyButton.style.display = 'block'; // Hiện nút sao chép
+            copyButton.style.display = 'block';
             copyButton.onclick = function() {
-                // Sao chép URL vào clipboard
                 navigator.clipboard.writeText(result.url).then(() => {
-                    // Chuyển hướng đến trang xem ảnh
-                    window.location.href = `view-image.html?url=${encodeURIComponent(result.url)}`;
-                }).catch(err => {
-                    console.error('Lỗi khi sao chép:', err);
+                    alert('Liên kết đã được sao chép!');
                 });
             };
         } else {
-            alert("Lỗi: Không nhận được URL ảnh từ server!");
+            throw new Error('Phản hồi không chứa trường url');
         }
-        
     } catch (error) {
-        console.error('Lỗi:', error);
-        alert('Tải lên thất bại!'); // Hiển thị thông báo lỗi
+        alert(error.message);
     } finally {
         uploadButton.disabled = false;
-        uploadButton.textContent = 'Chọn hình ảnh';
+        uploadButton.textContent = 'Tải lên';
     }
 }
-
 // ========== KÉO THẢ ==========
 dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
