@@ -652,6 +652,10 @@ fileInput.addEventListener('change', function(e) {
     }
 }
 
+     // Chuyển hướng đến trang xem ảnh. chuyển sang view-image.html
+    const imageUrl = linkInput.value;
+    window.location.href = `view-image.html?url=${encodeURIComponent(imageUrl)}`;
+
 
         // ========== KÉO THẢ ==========
         dropZone.addEventListener('dragover', (e) => {
