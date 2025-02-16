@@ -595,7 +595,8 @@ fileInput.addEventListener('change', function(e) {
     }
 });
 
-async function uploadFile() {
+
+        async function uploadFile() {
     const file = fileInput.files[0];
     if (!file) {
         alert('Vui lòng chọn ảnh trước khi tải lên');
@@ -614,9 +615,10 @@ async function uploadFile() {
             body: formData
         });
 
-        // Kiểm tra phản hồi từ server
+        // Kiểm tra mã trạng thái HTTP
         if (!response.ok) {
-            throw new Error('Lỗi tải lên: ' + response.statusText);
+            const errorMessage = await response.text(); // Lấy thông báo lỗi từ server
+            throw new Error('Lỗi tải lên: ' + errorMessage);
         }
 
         const result = await response.json();
@@ -634,7 +636,7 @@ async function uploadFile() {
                 // Sao chép URL vào clipboard
                 navigator.clipboard.writeText(result.url).then(() => {
                     alert('Đã sao chép link thành công!');
-                    // Chuyển hướng đến trang xem ảnh view_image.html
+                    // Chuyển hướng đến trang xem ảnh
                     window.location.href = `view-image.html?url=${encodeURIComponent(result.url)}`;
                 }).catch(err => {
                     console.error('Lỗi khi sao chép:', err);
@@ -646,7 +648,7 @@ async function uploadFile() {
         
     } catch (error) {
         console.error('Lỗi:', error);
-        alert('Tải lên thất bại!');
+        alert('Tải lên thất bại!'); // Hiển thị thông báo lỗi
     } finally {
         uploadButton.disabled = false;
         uploadButton.textContent = 'Chọn hình ảnh';
