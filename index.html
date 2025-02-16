@@ -588,14 +588,14 @@ document.addEventListener('keydown', (e) => {
             fileInput.click();
         });
         
-        // Xử lý khi chọn file qua dialog
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                uploadFile();
-            }
-        });
+// Xử lý khi chọn file qua dialog
+fileInput.addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        uploadFile();
+    }
+});
 
-       async function uploadFile() {
+async function uploadFile() {
     const file = fileInput.files[0];
     if (!file) {
         alert('Vui lòng chọn ảnh trước khi tải lên');
@@ -609,24 +609,32 @@ document.addEventListener('keydown', (e) => {
         uploadButton.disabled = true;
         uploadButton.textContent = 'Đang tải lên...';
 
-        const response = await fetch('https://tobicoo-dev-azure.up.railway.app/upload', {
+        const response = await fetch('tobicoo-dev-azure.up.railway.app/upload', {
             method: 'POST',
             body: formData
         });
 
-        if (!response.ok) {
-            throw new Error('Lỗi tải lên: ' + response.statusText);
-        }
-
         const result = await response.json();
-        console.log("Phản hồi từ server:", result);
-
-        if (result.url) {
+        
+        // Kiểm tra phản hồi từ server
+        if (response.ok && result.url) {
             document.getElementById('direct-link').value = result.url;
             document.getElementById('link-container').style.display = 'block';
+            alert('Tải lên thành công!'); // Thông báo thành công
 
-            // Chuyển hướng đến trang xem ảnh
-            window.location.href = `view-image.html?url=${encodeURIComponent(result.url)}`;
+            // Hiện nút sao chép liên kết
+            const copyButton = document.getElementById('copy-button');
+            copyButton.style.display = 'block'; // Hiện nút sao chép
+            copyButton.onclick = function() {
+                // Sao chép URL vào clipboard
+                navigator.clipboard.writeText(result.url).then(() => {
+                    alert('Đã sao chép link thành công!');
+                    // Chuyển hướng đến trang xem ảnh
+                    window.location.href = `view-image.html?url=${encodeURIComponent(result.url)}`;
+                }).catch(err => {
+                    console.error('Lỗi khi sao chép:', err);
+                });
+            };
         } else {
             alert("Lỗi: Không nhận được URL ảnh từ server!");
         }
