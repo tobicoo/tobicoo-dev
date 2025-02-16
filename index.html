@@ -578,16 +578,16 @@ document.addEventListener('keydown', (e) => {
         window.addEventListener('click', (e) => e.target === modal && closeModal());
         document.addEventListener('keydown', (e) => e.key === 'Escape' && closeModal());
 
-        // ========== XỬ LÝ UPLOAD ==========
-        const uploadButton = document.getElementById('upload-button');
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.querySelector('.upload-section');
-        
-        // Kích hoạt file input khi click nút
-        uploadButton.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
+// ========== XỬ LÝ UPLOAD ==========
+const uploadButton = document.getElementById('upload-button');
+const fileInput = document.getElementById('file-input');
+const dropZone = document.querySelector('.upload-section');
+
+// Kích hoạt file input khi click nút
+uploadButton.addEventListener('click', () => {
+    fileInput.click();
+});
+
 // Xử lý khi chọn file qua dialog
 fileInput.addEventListener('change', function(e) {
     if (e.target.files.length > 0) {
@@ -595,8 +595,7 @@ fileInput.addEventListener('change', function(e) {
     }
 });
 
-
-        async function uploadFile() {
+async function uploadFile() {
     const file = fileInput.files[0];
     if (!file) {
         alert('Vui lòng chọn ảnh trước khi tải lên');
@@ -627,7 +626,6 @@ fileInput.addEventListener('change', function(e) {
         if (result && result.url) {
             document.getElementById('direct-link').value = result.url;
             document.getElementById('link-container').style.display = 'block';
-            alert('Tải lên thành công!'); // Thông báo thành công
 
             // Hiện nút sao chép liên kết
             const copyButton = document.getElementById('copy-button');
@@ -635,7 +633,6 @@ fileInput.addEventListener('change', function(e) {
             copyButton.onclick = function() {
                 // Sao chép URL vào clipboard
                 navigator.clipboard.writeText(result.url).then(() => {
-                    alert('Đã sao chép link thành công!');
                     // Chuyển hướng đến trang xem ảnh
                     window.location.href = `view-image.html?url=${encodeURIComponent(result.url)}`;
                 }).catch(err => {
@@ -646,38 +643,41 @@ fileInput.addEventListener('change', function(e) {
             alert("Lỗi: Không nhận được URL ảnh từ server!");
         }
         
-    }  finally {
+    } catch (error) {
+        console.error('Lỗi:', error);
+        alert('Tải lên thất bại!'); // Hiển thị thông báo lỗi
+    } finally {
         uploadButton.disabled = false;
         uploadButton.textContent = 'Chọn hình ảnh';
     }
 }
 
-     // Chuyển hướng đến trang xem ảnh. chuyển sang view-image.html
+// ========== KÉO THẢ ==========
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#2196F3';
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = '#ced4da';
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileInput.files = e.dataTransfer.files;
+    uploadFile();
+});
+
+// ========== SAO CHÉP LINK ==========
+document.getElementById('copy-link').addEventListener('click', () => {
+    const linkInput = document.getElementById('direct-link');
+    linkInput.select();
+    document.execCommand('copy');
+
+    // Chuyển hướng đến trang xem ảnh
     const imageUrl = linkInput.value;
     window.location.href = `view-image.html?url=${encodeURIComponent(imageUrl)}`;
 
-
-        // ========== KÉO THẢ ==========
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#2196F3';
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.borderColor = '#ced4da';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileInput.files = e.dataTransfer.files;
-            uploadFile();
-        });
-
-        // ========== SAO CHÉP LINK ==========
-        document.getElementById('copy-link').addEventListener('click', () => {
-            const linkInput = document.getElementById('direct-link');
-            linkInput.select();
-            document.execCommand('copy');
             
             // Hiệu ứng feedback
             const copyBtn = document.getElementById('copy-link');
