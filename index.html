@@ -606,7 +606,7 @@ document.addEventListener('keydown', (e) => {
                 uploadButton.disabled = true;
                 uploadButton.textContent = 'Đang tải lên...';
 
-                const response = await fetch('https://tobicoo-dev-azure.up.railway.app//upload', {
+                const response = await fetch('https://tobicoo-dev-azure.up.railway.app/upload', {
                     method: 'POST',
                     body: formData
                 });
