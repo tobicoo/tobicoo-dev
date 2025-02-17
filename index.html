@@ -196,14 +196,18 @@
                 fill: currentColor;
             }
         
-                /* === Chân trang === */
-                footer {
-        
-                    text-align: center;
-                    padding: 1rem;
-                    color: #f3e1e1;
-                    background: rgb(42, 61, 97);
-                }
+                       /* === Chân trang luôn ở dưới cùng === */
+    footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgb(42, 61, 97); /* Màu nền */
+        color: #f3e1e1;; /* Màu chữ */
+        text-align: center;
+        padding: 1rem;
+            }
+
         
                 .footer-links {/*liên kết chân trang*/
                     margin-bottom: 1rem;
