@@ -46,7 +46,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         const timestamp = Date.now();
         const extension = req.file.originalname.split('.').pop();
         const blobName = `${timestamp}.${extension}`;
-
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
         // Upload lên Azure
@@ -54,6 +53,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             blobHTTPHeaders: { blobContentType: req.file.mimetype }
         });
 
+         // Trả về URL ảnh đã upload
+        const imageUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blobName}`;
+
+        console.log(`✅ Upload thành công: ${imageUrl}`);
         res.status(200).json({
             url: blockBlobClient.url,
             message: 'Upload ảnh thành công!'
@@ -68,26 +71,73 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-// Kiểm tra trạng thái server
+
+/**
+ * 🎯 API Lấy danh sách ảnh từ Azure Blob Storage
+ */
+app.get('/images', async (req, res) => {
+    try {
+        let imageUrls = [];
+        for await (const blob of containerClient.listBlobsFlat()) {
+            const imageUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blob.name}`;
+            imageUrls.push(imageUrl);
+        }
+
+        res.status(200).json({ images: imageUrls });
+
+    } catch (error) {
+        console.error('🔴 Lỗi lấy danh sách ảnh:', error);
+        res.status(500).json({ error: 'Không thể lấy danh sách ảnh', details: error.message });
+    }
+});
+
+/**
+ * 🎯 API Xóa ảnh khỏi Azure Blob Storage
+ */
+app.delete('/delete', async (req, res) => {
+    try {
+        const { filename } = req.body;
+        if (!filename) {
+            return res.status(400).json({ error: 'Thiếu tên file cần xóa' });
+        }
+
+        const blobClient = containerClient.getBlockBlobClient(filename);
+        await blobClient.deleteIfExists();
+
+        console.log(`🗑️ Đã xóa ảnh: ${filename}`);
+        res.status(200).json({ message: `Ảnh ${filename} đã bị xóa` });
+
+    } catch (error) {
+        console.error('🔴 Lỗi xóa ảnh:', error);
+        res.status(500).json({ error: 'Lỗi server khi xóa ảnh', details: error.message });
+    }
+});
+
+/**
+ * 🎯 API Kiểm tra trạng thái server
+ */
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'Server is running!' });
 });
 
-// Xử lý các route không tồn tại
+/**
+ * 🎯 Xử lý các route không tồn tại
+ */
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint không tồn tại' });
 });
 
-// Xử lý lỗi toàn cục
+/**
+ * 🎯 Xử lý lỗi toàn cục
+ */
 app.use((err, req, res, next) => {
     console.error('🔴 Lỗi hệ thống:', err);
-    res.status(500).json({
-        error: 'Lỗi hệ thống',
-        message: err.message
-    });
+    res.status(500).json({ error: 'Lỗi hệ thống', message: err.message });
 });
 
-// Khởi động server
+/**
+ * 🎯 Khởi động server
+ */
 app.listen(port, async () => {
     try {
         await containerClient.getProperties();
