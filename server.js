@@ -91,7 +91,7 @@ app.use((err, req, res, next) => {
 app.listen(port, async () => {
     try {
         await containerClient.getProperties();
-        console.log(`🟢 Server đang chạy trên http://localhost:${port}`);
+        console.log(`🟢 Server đang chạy trên https://tobicoo-dev-azure.up.railway.app`);
         console.log(`🟢 Kết nối Azure thành công với container: ${process.env.CONTAINER_NAME}`);
     } catch (error) {
         console.error('🔴 Lỗi kết nối Azure:', error.message);
