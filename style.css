@@ -35,7 +35,22 @@ nav {
     justify-content: space-between;/*căn chỉnh theo chiều ngang*/
     align-items: center;/*căn chỉnh theo chiều dọc*/
 }
-
+nav .nav-links a.view-gallery-button-inline {
+    border: 2px solid #1e90ff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: #1e90ff;
+    font-weight: bold;
+    background-color: transparent;
+    transition: all 0.25s ease;
+  }
+  
+  nav .nav-links a.view-gallery-button-inline:hover {
+    background-color: #1e90ff;
+    color: #fff;
+    text-decoration: none;
+  }
+  
 .logo {
     display: flex;/*hiển thị theo kiểu flex*/   
     align-items: center;/*căn chỉnh theo chiều dọc*/
@@ -306,51 +321,14 @@ margin-bottom: 10px;/*khoảng cách dưới*/
 font-size: 1.1em;/*kích thước chữ*/
 }
 
-
-
-/* ===== THƯ VIỆN ẢNH (GALLERY) ===== */
-
-#gallery-container {
-    margin-top: 40px;
-    }
-
-    .gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    }
-
-    .image-wrapper {
-    position: relative;
-    width: 180px;
-    transition: transform 0.3s;
-    }
-
-    .image-wrapper:hover {
-    transform: scale(1.03);
-    }
-
-    .gallery-img {
-    width: 100%;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .delete-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background-color: crimson;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
-    }
-
-    .delete-btn:hover {
-    background-color: darkred;
-    }
+nav .nav-links a.view-gallery-button-inline {
+    margin-left: 20px;
+    color: #2196f3;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  nav .nav-links a.view-gallery-button-inline:hover {
+    text-decoration: underline;
+  }
+  
