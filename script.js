@@ -140,7 +140,6 @@ if (copyBtn) {
         }, 2000);
     });
 }
-
 // ================= THƯ VIỆN ẢNH & XOÁ ẢNH =================
 
 // Gọi API để lấy danh sách ảnh
@@ -153,32 +152,119 @@ async function loadGallery() {
         const galleryContainer = document.getElementById('gallery-container');
         const gallery = document.createElement('div');
         gallery.classList.add('gallery');
+        gallery.style.display = 'grid';
+        gallery.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+        gallery.style.gap = '20px';
+        gallery.style.marginTop = '20px';
 
         images.forEach(url => {
             const wrapper = document.createElement('div');
             wrapper.classList.add('image-wrapper');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.background = '#fff';
+            wrapper.style.padding = '12px';
+            wrapper.style.borderRadius = '10px';
+            wrapper.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+            wrapper.style.transition = 'transform 0.2s';
+            wrapper.onmouseover = () => wrapper.style.transform = 'scale(1.03)';
+            wrapper.onmouseout = () => wrapper.style.transform = 'scale(1)';
 
             const img = document.createElement('img');
             img.src = url;
             img.alt = 'Uploaded image';
             img.classList.add('gallery-img');
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.borderRadius = '6px';
+            img.style.marginBottom = '10px';
+            img.style.cursor = 'zoom-in';
+            img.onclick = () => openImageModal(url);
+
+            const btnGroup = document.createElement('div');
+            btnGroup.style.display = 'flex';
+            btnGroup.style.gap = '10px';
 
             const delBtn = document.createElement('button');
             delBtn.innerText = 'Xoá';
             delBtn.classList.add('delete-btn');
+            delBtn.style.padding = '6px 14px';
+            delBtn.style.background = '#e74c3c';
+            delBtn.style.color = '#fff';
+            delBtn.style.border = 'none';
+            delBtn.style.borderRadius = '4px';
+            delBtn.style.cursor = 'pointer';
             delBtn.onclick = () => deleteImage(url, wrapper);
 
+            const downloadBtn = document.createElement('a');
+            downloadBtn.href = url;
+            downloadBtn.download = '';
+            downloadBtn.innerText = 'Tải về';
+            downloadBtn.classList.add('download-btn');
+            downloadBtn.style.padding = '6px 14px';
+            downloadBtn.style.background = '#3498db';
+            downloadBtn.style.color = '#fff';
+            downloadBtn.style.textDecoration = 'none';
+            downloadBtn.style.borderRadius = '4px';
+
+            btnGroup.appendChild(downloadBtn);
+            btnGroup.appendChild(delBtn);
+
             wrapper.appendChild(img);
-            wrapper.appendChild(delBtn);
+            wrapper.appendChild(btnGroup);
             gallery.appendChild(wrapper);
         });
 
         galleryContainer.innerHTML = '';
         galleryContainer.appendChild(gallery);
 
+        createImageModal();
+
     } catch (err) {
         console.error('Lỗi khi tải thư viện ảnh:', err);
     }
+}
+
+// Modal xem ảnh toàn màn
+function createImageModal() {
+    if (document.getElementById('fullscreen-modal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'fullscreen-modal';
+    modal.style.display = 'none';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.85)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '9999';
+    modal.style.cursor = 'zoom-out';
+
+    const modalImg = document.createElement('img');
+    modalImg.id = 'fullscreen-img';
+    modalImg.style.maxWidth = '90%';
+    modalImg.style.maxHeight = '90%';
+    modalImg.style.borderRadius = '12px';
+    modalImg.style.boxShadow = '0 0 20px rgba(255,255,255,0.3)';
+    modal.appendChild(modalImg);
+
+    modal.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    document.body.appendChild(modal);
+}
+
+function openImageModal(url) {
+    const modal = document.getElementById('fullscreen-modal');
+    const modalImg = document.getElementById('fullscreen-img');
+    modalImg.src = url;
+    modal.style.display = 'flex';
 }
 
 // Gửi yêu cầu xoá ảnh
