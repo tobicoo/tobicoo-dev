@@ -1,0 +1,356 @@
+* {
+    margin: 0;/*khoảng cách giữa các phần tử*/
+    padding: 0;/*khoảng cách giữa các phần tử*/
+    box-sizing: border-box;/*kích thước của phần tử bao gồm cả padding và border nhưng không tính margin*/
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;/*font chữ*/
+}
+
+/* === Toàn trang === */
+/* === Background toàn trang === */
+body {
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;/*tự động điều chỉnh kích thước ảnh nền*/
+    min-height: 100vh;/*chiều cao tối thiểu*/
+    overflow:   ;/*ẩn thanh cuộn*/
+    
+}
+
+/* Overlay làm mờ nền chung */
+body::before {
+    content: "";/*nội dung giả*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;/*độ sâu*/
+}
+
+/* === Thanh điều hướng/trên cùng === */
+nav { 
+    background;/*màu nền*/
+    padding: 1rem 2rem;/*khoảng cách giữa các phần tử*/
+    box-shadow: 0 3px 10px rgba(18, 4, 4, 0.1);/*đổ bóng*/
+    display: flex;
+    justify-content: space-between;/*căn chỉnh theo chiều ngang*/
+    align-items: center;/*căn chỉnh theo chiều dọc*/
+}
+
+.logo {
+    display: flex;/*hiển thị theo kiểu flex*/   
+    align-items: center;/*căn chỉnh theo chiều dọc*/
+    gap: 12px;/*khoảng cách giữa các phần tử*/
+    text-decoration: rgb(23, 25, 52);/*gạch chân*/
+}
+
+.logo img {/*logo*/
+    height: 50px;/*chiều cao logo*/
+    width: auto;/*chiều rộng tự động*/
+    transition: transform 0.6s ease;/*hiệu ứng khi di chuột vào logo*/
+}
+
+.logo:hover img {/*hiệu ứng khi di chuột vào logo*/
+    transform: scale(1.35);/*phóng to ảnh*/
+}
+
+.logo-text {/*tên logo*/
+    font-size: 2.0rem;
+    font-weight: 700;/*độ đậm*/
+    color: #2196F3;
+}
+
+.nav-links a {/*chữ bên phải*/
+    color: #2196F3;/*màu chữ*/
+    font-weight: 600;/*độ đậm*/
+    text-decoration: none;/*gạch chân*/
+    margin-left: 2rem;/*khoảng cách giữa các nút*/
+    transition: color 0.3s;/*hiệu ứng màu chữ*/
+    font-size: 17px;
+}
+
+.nav-links a:hover {/*hiệu ứng khi di chuột vào nút*/
+    color: #1976D2;
+}
+
+/* === Nội dung chính === */
+.container {/*nội dung chính*/
+    max-width: 800px;/*chiều rộng tối đa*/
+    margin: 3rem auto;/*khoảng cách giữa các phần tử*/
+    padding: 2rem;/*khoảng cách giữa các phần tử*/
+    background: rgba(207, 195, 195, 0.8);/*màu nền*/
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(86, 24, 24, 0.08);
+    text-align: center;/*căn chỉnh theo giữa*/
+}
+
+/* === Khu vực upload === */
+.upload-section {/*khu vực upload*/
+    border: 2px dashed #ced4da;/*viền*/
+    border-radius: 8px;/*bo tròn*/
+    padding: 3rem 2rem;/*khoảng cách giữa các phần tử*/
+    margin: 2rem 0;/*khoảng cách giữa các phần tử*/
+    cursor: pointer;/*con trỏ chuột*/
+
+}
+
+.upload-section:hover {/*hiệu ứng khi di chuột vào khu vực upload*/
+    border-color: #2196F3;
+    background: #f8f9fe;
+
+}
+
+/* === Nút bấm Chọn hình ảnh === */
+#upload-button {/*nút bấm*/
+    align-items: center;/*căn chỉnh theo chiều dọc*/
+    background: #2196F3;
+    color: white;
+    border: none;/*không có viền*/
+    padding: 0.8rem 2rem;/*khoảng cách giữa các phần tử*/
+    border-radius: 8px;/*bo tròn*/
+    cursor: pointer;/*con trỏ chuột*/
+    display: flex ;
+    margin: 2rem auto;/*khoảng cách giữa các phần tử*/
+    width: fit-content;
+    gap: 8px;/*khoảng cách giữa các phần tử*/
+    transition: background 0.3s;/*hiệu ứng*/
+}
+.folder-icon { /*icon thư mục*/
+    display: flex;
+}
+#upload-button:hover {/*hiệu ứng khi di chuột vào nút bấm*/
+    background: #1976D2;
+}
+
+/* === Kết quả khi tải ảnh thành công === */
+#link-container {/*kết quả khi tải ảnh thành công*/
+background: #f8f9fe;
+padding: 1.5rem;
+border-radius: 12px;
+margin-top: 2rem;
+display: none;
+border: 2px solid #2196F3;
+text-align: center;
+}
+
+#direct-link {/*liên kết trực tiếp*/
+width: 100%;
+padding: 12px 20px;
+border: 2px solid #2196F3;
+border-radius: 8px;
+margin: 1rem 0;
+font-size: 16px;
+color: #333;
+background: #fff;
+transition: all 0.3s ease;
+}
+
+#direct-link:focus {/*hiệu ứng khi focus vào liên kết*/
+outline: none;
+box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+#copy-link {/*nút sao chép liên kết*/
+background: #2196F3;
+color: white;
+border: none;
+padding: 12px 24px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 16px;
+transition: all 0.3s ease;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+}
+
+#copy-link:hover {/*hiệu ứng khi di chuột vào nút sao chép*/
+background: #1976D2;
+transform: translateY(-1px);
+}
+
+#copy-link:active {/*hiệu ứng khi nhấn nút sao chép*/
+transform: translateY(0);
+}
+
+.success-message {/*thông báo thành công*/
+color: #4CAF50;
+font-weight: 500;
+margin-bottom: 1rem;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+.success-message svg {
+width: 24px;
+height: 24px;
+fill: currentColor;
+}
+
+       /* === Chân trang luôn ở dưới cùng === */
+footer {
+position: relative;
+bottom: 0;
+left: 0;
+width: 100%;
+background: rgb(42, 61, 97); /* Màu nền */
+color: #f3e1e1;; /* Màu chữ */
+text-align: center;
+padding: 1rem;
+}
+
+
+.footer-links {/*liên kết chân trang*/
+    margin-bottom: 1rem;
+}
+
+.footer-links a {
+    color: #f1efef;
+    text-decoration: none;/*gạch chân*/
+    margin: 0 1.5rem;/*khoảng cách giữa các nút*/
+}
+
+/* === Modal About Us === */
+.modal {
+    display: none;
+    position: fixed;/*cố định vị trí*/
+    z-index: 1000;/*độ sâu*/
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;/*cuộn*/
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {/*nội dung modal*/
+    background-color: #fff;
+    margin: 5% auto;/*khoảng cách giữa các phần tử*/
+    padding: 30px;
+    border-radius: 15px;
+    width: 85%;
+    max-width: 700px;/*chiều rộng tối đa*/
+    position: relative;/*tương đối*/
+    animation: modalSlide 0.4s ease-out;/*hiệu ứng*/
+}
+
+@keyframes modalSlide {/*hiệu ứng*/
+    from { transform: translateY(-100px); opacity: 0; }/*từ trên xuống*/
+    to { transform: translateY(0); opacity: 1; }/*đến giữa*/
+}
+
+.close {
+    
+    position: absolute;/*tuyệt đối*/
+    right: 25px;
+    top: 15px;
+    font-size: 35px;
+    color: #666;
+    cursor: pointer;/*con trỏ chuột*/
+    transition: color 0.3s;
+}
+
+.close:hover {/*hiệu ứng khi di chuột vào nút đóng*/
+    color: #333;
+}
+ /* === Modal Điều khoản === */
+.terms-content {/*nội dung điều khoản*/
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 15px;
+    line-height: 1.6;
+}
+
+.terms-section {/*phần điều khoản*/
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.terms-section h3 {/*tiêu đề*/
+    color: #2196F3;
+    margin-bottom: 10px;/*khoảng cách dưới*/
+    font-size: 1.1em;
+}
+
+.terms-section ul {/*danh sách*/
+    padding-left: 20px;/*khoảng cách bên trái*/
+    margin: 10px 0;
+}
+
+.terms-section li {/*mục danh sách*/
+    margin: 8px 0;
+}
+
+
+/* === Modal Chính sách bảo mật === */
+.privacy-content {/*nội dung chính sách bảo mật*/
+max-height: 70vh;/*chiều cao tối đa*/
+overflow-y: auto;/*cuộn*/
+padding: 15px;/*khoảng cách giữa các phần tử*/
+line-height: 1.6;/*độ cao dòng*/
+}
+
+.privacy-section {/*phần chính sách bảo mật*/
+margin: 20px 0;/*khoảng cách giữa các phần tử*/
+padding: 15px;/*khoảng cách giữa các phần tử*/
+background: #f8f9fa;
+border-radius: 8px;/*bo tròn*/
+}
+
+.privacy-section h3 {/*tiêu đề*/
+color: #2196F3;
+margin-bottom: 10px;/*khoảng cách dưới*/
+font-size: 1.1em;/*kích thước chữ*/
+}
+
+
+
+/* ===== THƯ VIỆN ẢNH (GALLERY) ===== */
+
+#gallery-container {
+    margin-top: 40px;
+    }
+
+    .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    }
+
+    .image-wrapper {
+    position: relative;
+    width: 180px;
+    transition: transform 0.3s;
+    }
+
+    .image-wrapper:hover {
+    transform: scale(1.03);
+    }
+
+    .gallery-img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: crimson;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+    }
+
+    .delete-btn:hover {
+    background-color: darkred;
+    }
