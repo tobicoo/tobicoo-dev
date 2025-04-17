@@ -4,28 +4,23 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const cors = require('cors');
 require('dotenv').config();
 
-// Khởi tạo ứng dụng Express
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Kiểm tra biến môi trường
-if (!process.env.AZURE_STORAGE_CONNECTION_STRING || !process.env.CONTAINER_NAME) {
+if (!process.env.AZURE_STORAGE_CONNECTION_STRING || !process.env.CONTAINER_NAME || !process.env.AZURE_STORAGE_ACCOUNT) {
     console.error('🔴 Thiếu biến môi trường! Vui lòng kiểm tra file .env');
     process.exit(1);
 }
 
-// Kết nối Azure Blob Storage
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
 const containerClient = blobServiceClient.getContainerClient(process.env.CONTAINER_NAME);
 
-// Cấu hình Multer
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // Giới hạn 10MB
+    limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (!/^image\/(jpeg|png|gif)$/.test(file.mimetype)) {
             return cb(new Error('Chỉ chấp nhận file ảnh (JPEG/PNG/GIF)'), false);
@@ -34,52 +29,42 @@ const upload = multer({
     }
 });
 
-// ========== API Endpoints ==========
-// Upload file lên Azure
+// Upload ảnh
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'Vui lòng chọn file ảnh' });
-        }
+        if (!req.file) return res.status(400).json({ error: 'Vui lòng chọn file ảnh' });
 
-        // Tạo tên file unique
         const timestamp = Date.now();
         const extension = req.file.originalname.split('.').pop();
         const blobName = `${timestamp}.${extension}`;
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-        // Upload lên Azure
         await blockBlobClient.uploadData(req.file.buffer, {
             blobHTTPHeaders: { blobContentType: req.file.mimetype }
         });
 
-         // Trả về URL ảnh đã upload
-        const imageUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blobName}`;
+        const accountName = process.env.AZURE_STORAGE_ACCOUNT;
+        const imageUrl = `https://${accountName}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blobName}`;
 
         console.log(`✅ Upload thành công: ${imageUrl}`);
         res.status(200).json({
-            url: blockBlobClient.url,
+            url: imageUrl,
             message: 'Upload ảnh thành công!'
         });
-
     } catch (error) {
         console.error('🔴 Lỗi upload:', error);
-        res.status(500).json({
-            error: 'Lỗi server khi xử lý ảnh',
-            details: error.message
-        });
+        res.status(500).json({ error: 'Lỗi server khi xử lý ảnh', details: error.message });
     }
 });
 
-
-/**
- * 🎯 API Lấy danh sách ảnh từ Azure Blob Storage
- */
+// Lấy danh sách ảnh
 app.get('/images', async (req, res) => {
     try {
+        const accountName = process.env.AZURE_STORAGE_ACCOUNT;
         let imageUrls = [];
+
         for await (const blob of containerClient.listBlobsFlat()) {
-            const imageUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blob.name}`;
+            const imageUrl = `https://${accountName}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blob.name}`;
             imageUrls.push(imageUrl);
         }
 
@@ -91,15 +76,11 @@ app.get('/images', async (req, res) => {
     }
 });
 
-/**
- * 🎯 API Xóa ảnh khỏi Azure Blob Storage
- */
+// Xoá ảnh
 app.delete('/delete', async (req, res) => {
     try {
         const { filename } = req.body;
-        if (!filename) {
-            return res.status(400).json({ error: 'Thiếu tên file cần xóa' });
-        }
+        if (!filename) return res.status(400).json({ error: 'Thiếu tên file cần xóa' });
 
         const blobClient = containerClient.getBlockBlobClient(filename);
         await blobClient.deleteIfExists();
@@ -113,35 +94,27 @@ app.delete('/delete', async (req, res) => {
     }
 });
 
-/**
- * 🎯 API Kiểm tra trạng thái server
- */
+// Check server
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'Server is running!' });
 });
 
-/**
- * 🎯 Xử lý các route không tồn tại
- */
+// Route không tồn tại
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint không tồn tại' });
 });
 
-/**
- * 🎯 Xử lý lỗi toàn cục
- */
+// Xử lý lỗi toàn cục
 app.use((err, req, res, next) => {
     console.error('🔴 Lỗi hệ thống:', err);
     res.status(500).json({ error: 'Lỗi hệ thống', message: err.message });
 });
 
-/**
- * 🎯 Khởi động server
- */
+// Khởi động server
 app.listen(port, async () => {
     try {
         await containerClient.getProperties();
-        console.log(`🟢 Server đang chạy trên https://tobicoo-dev-azure.up.railway.app`);
+        console.log(`🟢 Server đang chạy tại https://tobicoo-dev-azure.up.railway.app`);
         console.log(`🟢 Kết nối Azure thành công với container: ${process.env.CONTAINER_NAME}`);
     } catch (error) {
         console.error('🔴 Lỗi kết nối Azure:', error.message);
