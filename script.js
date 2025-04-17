@@ -239,7 +239,6 @@ function createImageModal() {
     modal.style.width = '100vw';
     modal.style.height = '100vh';
     modal.style.backgroundColor = 'rgba(0,0,0,0.85)';
-    modal.style.display = 'flex';
     modal.style.justifyContent = 'center';
     modal.style.alignItems = 'center';
     modal.style.zIndex = '9999';
