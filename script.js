@@ -144,66 +144,68 @@ document.addEventListener('keydown', (e) => {
         });
 
 
-        // ================= THƯ VIỆN ẢNH & XOÁ ẢNH =================
+ // ================= THƯ VIỆN ẢNH & XOÁ ẢNH =================
+
+const API_BASE = 'https://tobicoo-dev-azure.up.railway.app';
 
 // Gọi API để lấy danh sách ảnh
 async function loadGallery() {
-    try {
-      const response = await fetch('https://tobicoo-dev-azure.up.railway.app/images');
-      const { images } = await response.json();
-  
-      const galleryContainer = document.getElementById('gallery-container');
-      const gallery = document.createElement('div');
-      gallery.classList.add('gallery');
-  
-      images.forEach(url => {
-        const wrapper = document.createElement('div');
-        wrapper.classList.add('image-wrapper');
-  
-        const img = document.createElement('img');
-        img.src = url;
-        img.alt = 'Uploaded image';
-        img.classList.add('gallery-img');
-  
-        const delBtn = document.createElement('button');
-        delBtn.innerText = 'Xoá';
-        delBtn.classList.add('delete-btn');
-        delBtn.onclick = () => deleteImage(url, wrapper);
-  
-        wrapper.appendChild(img);
-        wrapper.appendChild(delBtn);
-        gallery.appendChild(wrapper);
-      });
-  
-      galleryContainer.innerHTML = ''; // Xoá cũ nếu có
-      galleryContainer.appendChild(gallery);
-  
-    } catch (err) {
-      console.error('Lỗi khi tải thư viện ảnh:', err);
-    }
+  try {
+    const response = await fetch(`${API_BASE}/images`);
+    const data = await response.json();
+    const images = data.images || data; // Hỗ trợ cả khi trả về mảng trực tiếp
+
+    const galleryContainer = document.getElementById('gallery-container');
+    const gallery = document.createElement('div');
+    gallery.classList.add('gallery');
+
+    images.forEach(url => {
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('image-wrapper');
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Uploaded image';
+      img.classList.add('gallery-img');
+
+      const delBtn = document.createElement('button');
+      delBtn.innerText = 'Xoá';
+      delBtn.classList.add('delete-btn');
+      delBtn.onclick = () => deleteImage(url, wrapper);
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(delBtn);
+      gallery.appendChild(wrapper);
+    });
+
+    galleryContainer.innerHTML = ''; // Xoá cũ nếu có
+    galleryContainer.appendChild(gallery);
+
+  } catch (err) {
+    console.error('Lỗi khi tải thư viện ảnh:', err);
   }
-  
-  // Gửi yêu cầu xoá ảnh
-  async function deleteImage(imageUrl, imageElement) {
-    try {
-      const filename = imageUrl.split('/').pop(); // Tách tên file
-      const response = await fetch('https://tobicoo-dev-azure.up.railway.app/delete', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename })
-      });
-  
-      if (response.ok) {
-        imageElement.remove();
-        alert('✅ Đã xoá ảnh thành công!');
-      } else {
-        alert('❌ Xoá ảnh thất bại!');
-      }
-    } catch (err) {
-      console.error('Lỗi xoá ảnh:', err);
+}
+
+// Gửi yêu cầu xoá ảnh
+async function deleteImage(imageUrl, imageElement) {
+  try {
+    const filename = imageUrl.split('/').pop(); // Tách tên file
+    const response = await fetch(`${API_BASE}/delete`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename })
+    });
+
+    if (response.ok) {
+      imageElement.remove();
+      alert('✅ Đã xoá ảnh thành công!');
+    } else {
+      alert('❌ Xoá ảnh thất bại!');
     }
+  } catch (err) {
+    console.error('Lỗi xoá ảnh:', err);
   }
-  
-  // Tải gallery khi trang load
-  window.addEventListener('DOMContentLoaded', loadGallery);
-  
+}
+
+// Tải gallery khi trang load
+window.addEventListener('DOMContentLoaded', loadGallery);
