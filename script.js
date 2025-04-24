@@ -79,11 +79,20 @@ async function uploadFile() {
             method: 'POST',
             body: formData
         });
+        const end = performance.now(); // Kết thúc đo thời gian
+        const duration = ((end - start) / 1000).toFixed(2); // tính giây
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2); // tính MB
 
         const result = await response.json();
         document.getElementById('direct-link').value = result.url;
         document.getElementById('link-container').style.display = 'block';
-
+        // Hiển thị kết quả sau khi tải lên
+        const uploadInfo = document.getElementById('upload-time');
+        if (uploadInfo) {
+            uploadInfo.textContent = `📁 Dung lượng: ${sizeMB} MB | ⏱️ Thời gian tải: ${duration} giây`;
+            uploadInfo.style.color = 'green';
+            uploadInfo.style.marginTop = '10px';
+        }
     } catch (error) {
         console.error('Lỗi:', error);
         alert('Tải lên thất bại!');
