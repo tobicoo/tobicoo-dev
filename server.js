@@ -134,36 +134,6 @@ app.use((err, req, res, next) => {
     console.error('🔴 Lỗi hệ thống:', err);
     res.status(500).json({ error: 'Lỗi hệ thống', message: err.message });
 });
-const {
-    StorageSharedKeyCredential,
-    generateBlobSASQueryParameters,
-    BlobSASPermissions
-} = require('@azure/storage-blob');
-
-// Tạo credentials để ký SAS
-const sharedKeyCredential = new StorageSharedKeyCredential(
-    process.env.AZURE_STORAGE_ACCOUNT,
-    process.env.AZURE_STORAGE_ACCOUNT_KEY
-);
-
-// 🎯 API sinh SAS token để frontend upload ảnh trực tiếp
-app.get('/generate-sas', (req, res) => {
-    const blobName = req.query.filename;
-    if (!blobName) {
-        return res.status(400).json({ error: 'Thiếu tên file (filename)' });
-    }
-
-    const expiresOn = new Date(new Date().valueOf() + 5 * 60 * 1000); // Hết hạn 5 phút
-    const sasToken = generateBlobSASQueryParameters({
-        containerName: process.env.CONTAINER_NAME,
-        blobName,
-        permissions: BlobSASPermissions.parse("cw"), // create + writ
-        expiresOn
-    }, sharedKeyCredential).toString();
-
-    const sasUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blobName}?${sasToken}`;
-    res.json({ sasUrl });
-});
 
 /**
  * 🎯 Khởi động server
