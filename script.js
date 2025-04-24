@@ -75,22 +75,20 @@ async function uploadFile() {
         uploadButton.disabled = true;
         uploadButton.textContent = 'Đang tải lên...';
 
-            const start = performance.now();
+        const start = performance.now();
+
         const response = await fetch('https://tobicoo-dev-azure.up.railway.app/upload', {
             method: 'POST',
             body: formData
         });
-        
-const end = performance.now();
-const duration = ((end - start) / 1000).toFixed(2);
-const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
 
-        
-      if (uploadTimeDisplay) {
-        uploadTimeDisplay.textContent = `📁 Dung lượng ảnh: ${sizeInMB} MB | ⏱️ Thời gian tải: ${duration} giây`;
-    }
-    
+        const end = performance.now();
+        const duration = ((end - start) / 1000).toFixed(2);
 
+        // hiển thị thời gian
+        if (uploadTimeDisplay) {
+            uploadTimeDisplay.textContent = `⏱️ Thời gian tải ảnh: ${duration} giây`;
+        }
 
         const result = await response.json();
         document.getElementById('direct-link').value = result.url;
@@ -104,6 +102,7 @@ const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
         uploadButton.textContent = 'Chọn hình ảnh';
     }
 }
+
 
 if (dropZone) {
     dropZone.addEventListener('dragover', (e) => {
