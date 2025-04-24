@@ -48,7 +48,6 @@ if (aboutModal && aboutLink && closeAboutBtn) {
 const uploadButton = document.getElementById('upload-button');
 const fileInput = document.getElementById('file-input');
 const dropZone = document.querySelector('.upload-section');
-const uploadInfo = document.getElementById('upload-time'); // <div id="upload-time"></div>
 
 if (uploadButton && fileInput) {
     uploadButton.addEventListener('click', () => {
@@ -69,56 +68,42 @@ async function uploadFile() {
         return;
     }
 
-    const filename = `${Date.now()}_${file.name}`;
-    const uploadInfo = document.getElementById('upload-time');
+    const formData = new FormData();
+    formData.append('file', file);
 
     try {
         uploadButton.disabled = true;
         uploadButton.textContent = 'Đang tải lên...';
-        const start = performance.now();
 
-        // 🔑 B1: Lấy SAS URL từ backend
-        const sasRes = await fetch(`https://tobicoo-dev-azure.up.railway.app/generate-sas?filename=${encodeURIComponent(filename)}`);
-        const { sasUrl } = await sasRes.json();
-
-        // 🚀 B2: Upload ảnh trực tiếp lên Azure qua SAS
-        const response = await fetch(sasUrl, {
-            method: 'PUT',
-            headers: {
-                "x-ms-blob-type": "BlockBlob",
-                "Content-Type": file.type
-            },
-            body: file
+            const start = performance.now();
+        const response = await fetch('https://tobicoo-dev-azure.up.railway.app/upload', {
+            method: 'POST',
+            body: formData
         });
+        
+const end = performance.now();
+const duration = ((end - start) / 1000).toFixed(2);
+const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
 
-        if (!response.ok) {
-            throw new Error('Upload thất bại qua SAS!');
-        }
+        
+      if (uploadTimeDisplay) {
+        uploadTimeDisplay.textContent = `📁 Dung lượng ảnh: ${sizeInMB} MB | ⏱️ Thời gian tải: ${duration} giây`;
+    }
+    
 
-        const end = performance.now();
-        const duration = ((end - start) / 1000).toFixed(2);
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
-        const publicUrl = sasUrl.split('?')[0];
-        document.getElementById('direct-link').value = publicUrl;
+        const result = await response.json();
+        document.getElementById('direct-link').value = result.url;
         document.getElementById('link-container').style.display = 'block';
 
-        if (uploadInfo) {
-            uploadInfo.textContent = `📁 Dung lượng: ${sizeMB} MB | ⏱️ Thời gian tải: ${duration} giây`;
-            uploadInfo.style.color = 'green';
-        }
-
-        console.log('✅ Upload thành công:', publicUrl);
-
     } catch (error) {
-        console.error('🔴 Lỗi upload:', error);
-        alert('Tải ảnh thất bại: ' + error.message);
+        console.error('Lỗi:', error);
+        alert('Tải lên thất bại!');
     } finally {
         uploadButton.disabled = false;
         uploadButton.textContent = 'Chọn hình ảnh';
     }
 }
-
 
 if (dropZone) {
     dropZone.addEventListener('dragover', (e) => {
@@ -167,8 +152,9 @@ if (copyBtn) {
         }, 2000);
     });
 }
-
 // ================= THƯ VIỆN ẢNH & XOÁ ẢNH =================
+
+// Gọi API để lấy danh sách ảnh
 async function loadGallery() {
     try {
         const response = await fetch('https://tobicoo-dev-azure.up.railway.app/images');
@@ -252,6 +238,7 @@ async function loadGallery() {
     }
 }
 
+// Modal xem ảnh toàn màn
 function createImageModal() {
     if (document.getElementById('fullscreen-modal')) return;
 
@@ -291,6 +278,7 @@ function openImageModal(url) {
     modal.style.display = 'flex';
 }
 
+// Gửi yêu cầu xoá ảnh
 async function deleteImage(imageUrl, imageElement) {
     try {
         const filename = imageUrl.split('/').pop();
@@ -311,4 +299,5 @@ async function deleteImage(imageUrl, imageElement) {
     }
 }
 
+// Tải gallery khi trang load
 window.addEventListener('DOMContentLoaded', loadGallery);
