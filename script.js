@@ -83,8 +83,14 @@ async function uploadFile() {
         
 const end = performance.now();
 const duration = ((end - start) / 1000).toFixed(2);
+const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
 
-document.getElementById('upload-time').textContent = `⏱️ Thời gian tải ảnh: ${duration} giây`;
+        
+      if (uploadTimeDisplay) {
+        uploadTimeDisplay.textContent = `📁 Dung lượng ảnh: ${sizeInMB} MB | ⏱️ Thời gian tải: ${duration} giây`;
+    }
+    
+
 
         const result = await response.json();
         document.getElementById('direct-link').value = result.url;
