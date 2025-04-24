@@ -71,31 +71,41 @@ async function uploadFile() {
     const formData = new FormData();
     formData.append('file', file);
 
+    const uploadInfo = document.getElementById('upload-time'); // lấy trước
+
     try {
         uploadButton.disabled = true;
         uploadButton.textContent = 'Đang tải lên...';
+
+        const start = performance.now();
 
         const response = await fetch('https://tobicoo-dev-azure.up.railway.app/upload', {
             method: 'POST',
             body: formData
         });
-        const end = performance.now(); // Kết thúc đo thời gian
-        const duration = ((end - start) / 1000).toFixed(2); // tính giây
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2); // tính MB
 
         const result = await response.json();
-        document.getElementById('direct-link').value = result.url;
-        document.getElementById('link-container').style.display = 'block';
-        // Hiển thị kết quả sau khi tải lên
-        const uploadInfo = document.getElementById('upload-time');
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Upload thất bại!');
+        }
+
+        const end = performance.now();
+        const duration = ((end - start) / 1000).toFixed(2);
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+        // ✅ Hiển thị kết quả
         if (uploadInfo) {
             uploadInfo.textContent = `📁 Dung lượng: ${sizeMB} MB | ⏱️ Thời gian tải: ${duration} giây`;
             uploadInfo.style.color = 'green';
-            uploadInfo.style.marginTop = '10px';
         }
+
+        document.getElementById('direct-link').value = result.url;
+        document.getElementById('link-container').style.display = 'block';
+
     } catch (error) {
-        console.error('Lỗi:', error);
-        alert('Tải lên thất bại!');
+        console.error('Lỗi upload:', error);
+        alert('❌ Tải ảnh thất bại: ' + error.message);
     } finally {
         uploadButton.disabled = false;
         uploadButton.textContent = 'Chọn hình ảnh';
