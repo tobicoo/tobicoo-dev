@@ -1,26 +1,47 @@
+// ===== IMPORT THƯ VIỆN =====
 const express = require('express');
 const multer = require('multer');
-const { BlobServiceClient } = require('@azure/storage-blob');
 const cors = require('cors');
 require('dotenv').config();
+const {
+    BlobServiceClient,
+    StorageSharedKeyCredential,
+    generateBlobSASQueryParameters,
+    BlobSASPermissions
+} = require('@azure/storage-blob');
 
+// ===== CẤU HÌNH SERVER =====
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-if (!process.env.AZURE_STORAGE_CONNECTION_STRING || !process.env.CONTAINER_NAME || !process.env.AZURE_STORAGE_ACCOUNT) {
+// ===== KIỂM TRA .env =====
+if (
+    !process.env.AZURE_STORAGE_CONNECTION_STRING ||
+    !process.env.CONTAINER_NAME ||
+    !process.env.AZURE_STORAGE_ACCOUNT ||
+    !process.env.AZURE_STORAGE_ACCOUNT_KEY
+) {
     console.error('🔴 Thiếu biến môi trường! Vui lòng kiểm tra file .env');
     process.exit(1);
 }
 
+// ===== KẾT NỐI AZURE BLOB =====
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
 const containerClient = blobServiceClient.getContainerClient(process.env.CONTAINER_NAME);
 
+// ===== CHUẨN BỊ ĐỂ SINH SAS TOKEN =====
+const sharedKeyCredential = new StorageSharedKeyCredential(
+    process.env.AZURE_STORAGE_ACCOUNT,
+    process.env.AZURE_STORAGE_ACCOUNT_KEY
+);
+
+// ===== CẤU HÌNH MULTER (Lưu tạm trên RAM) =====
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: 10 * 1024 * 1024 }, // Tối đa 10MB
     fileFilter: (req, file, cb) => {
         if (!/^image\/(jpeg|png|gif)$/.test(file.mimetype)) {
             return cb(new Error('Chỉ chấp nhận file ảnh (JPEG/PNG/GIF)'), false);
@@ -29,7 +50,7 @@ const upload = multer({
     }
 });
 
-// Upload ảnh
+// ====== API UPLOAD ẢNH QUA BACKEND ======
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'Vui lòng chọn file ảnh' });
@@ -57,7 +78,23 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-// Lấy danh sách ảnh
+// ====== API TẠO SAS TOKEN CHO FRONTEND ======
+app.get('/generate-sas', (req, res) => {
+    const blobName = req.query.filename;
+    const expiresOn = new Date(new Date().valueOf() + 5 * 60 * 1000); // hết hạn sau 5 phút
+
+    const sasToken = generateBlobSASQueryParameters({
+        containerName: process.env.CONTAINER_NAME,
+        blobName,
+        permissions: BlobSASPermissions.parse("cw"), // create + write
+        expiresOn
+    }, sharedKeyCredential).toString();
+
+    const sasUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blobName}?${sasToken}`;
+    res.json({ sasUrl });
+});
+
+// ====== API LẤY DANH SÁCH ẢNH ======
 app.get('/images', async (req, res) => {
     try {
         const accountName = process.env.AZURE_STORAGE_ACCOUNT;
@@ -76,7 +113,7 @@ app.get('/images', async (req, res) => {
     }
 });
 
-// Xoá ảnh
+// ====== API XOÁ ẢNH ======
 app.delete('/delete', async (req, res) => {
     try {
         const { filename } = req.body;
@@ -94,23 +131,23 @@ app.delete('/delete', async (req, res) => {
     }
 });
 
-// Check server
+// ====== API KIỂM TRA SỨC KHỎE SERVER ======
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'Server is running!' });
 });
 
-// Route không tồn tại
+// ====== ROUTE KHÔNG TỒN TẠI ======
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint không tồn tại' });
 });
 
-// Xử lý lỗi toàn cục
+// ====== XỬ LÝ LỖI TOÀN CỤC ======
 app.use((err, req, res, next) => {
     console.error('🔴 Lỗi hệ thống:', err);
     res.status(500).json({ error: 'Lỗi hệ thống', message: err.message });
 });
 
-// Khởi động server
+// ====== KHỞI ĐỘNG SERVER ======
 app.listen(port, async () => {
     try {
         await containerClient.getProperties();
