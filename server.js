@@ -68,7 +68,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             blobHTTPHeaders: { blobContentType: req.file.mimetype }
         });
 
-        const imageUrl = `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.CONTAINER_NAME}/${blobName}`;
+        const cdnUrl = `https://${process.env.AZURE_CDN_ENDPOINT}/${blobName}`;
 
         console.log(`✅ Upload thành công: ${imageUrl}`);
         res.status(200).json({
